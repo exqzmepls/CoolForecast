@@ -1,0 +1,28 @@
+﻿services:
+  cool.forecast.api:
+    container_name: cool-forecast-api
+    build:
+      context: .
+      dockerfile: CoolForecast.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - 5238:8080
+
+  cool.forecast.db:
+    image: postgres:16.1-alpine
+    container_name: cool-forecast-db
+    environment:
+      - POSTGRES_DB=cool-forecast
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    ports:
+      - 5432:5432
+
+  cool.forecast.seq:
+    image: datalust/seq:latest
+    container_name: cool-forecast-seq
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - 5080:80
