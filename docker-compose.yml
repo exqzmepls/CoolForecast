@@ -10,7 +10,7 @@
       - 5238:8080
 
   cool.forecast.db:
-    image: postgres:16.1-alpine
+    image: timescale/timescaledb-ha:pg14-latest
     container_name: cool-forecast-db
     environment:
       - POSTGRES_DB=cool-forecast
