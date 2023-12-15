@@ -1,4 +1,6 @@
-﻿services:
+﻿name: cool-forecast
+
+services:
   cool.forecast.api:
     container_name: cool-forecast-api
     build:
