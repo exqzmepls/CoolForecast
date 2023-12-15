@@ -1,4 +1,4 @@
-﻿name: cool-forecast
+﻿name: cool-forecast-debug
 
 services:
   cool.forecast.api:
@@ -6,6 +6,11 @@ services:
     build:
       context: .
       dockerfile: CoolForecast.Api/Dockerfile
+    depends_on:
+      cool.forecast.db:
+        condition: service_healthy
+      cool.forecast.seq:
+        condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
@@ -20,6 +25,11 @@ services:
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
     ports:
       - 5432:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   cool.forecast.seq:
     image: datalust/seq:latest
