@@ -19,10 +19,12 @@ internal sealed class ForecastCreatedEventHandler(
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         var forecast = await dbContext.Forecasts.SingleAsync(f => f.Id == notification.ForecastId, cancellationToken);
-        await using var dataStream = await largeObjectManager.OpenReadAsync(forecast.DataOid, cancellationToken);
+        await using (var dataStream = await largeObjectManager.OpenReadAsync(forecast.DataOid, cancellationToken))
+        {
+            var layoffForecasts = await layoffForecastService.GetLayoffForecastsAsync(dataStream, cancellationToken);
+            await AddLayoffForecastsAsync(forecast, layoffForecasts, cancellationToken);
+        }
 
-        var layoffForecasts = await layoffForecastService.GetLayoffForecastsAsync(dataStream, cancellationToken);
-        await AddLayoffForecastsAsync(forecast, layoffForecasts, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
     }
 
