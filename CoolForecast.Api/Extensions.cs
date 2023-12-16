@@ -1,4 +1,4 @@
-using CoolForecast.Api.Core;
+using CoolForecast.Api.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoolForecast.Api;

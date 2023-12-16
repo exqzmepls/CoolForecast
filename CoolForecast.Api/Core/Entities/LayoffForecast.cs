@@ -6,8 +6,12 @@ namespace CoolForecast.Api.Core.Entities;
 public sealed class LayoffForecast
 {
     public DateTimeOffset Time { get; set; }
+
     public double? Probability { get; set; }
 
-    public Guid EmployeeId { get; set; }
+    public string PersonnelNumber { get; set; } = null!;
     public Employee? Employee { get; set; }
+
+    public Guid ForecastId { get; set; }
+    public Forecast? Forecast { get; set; }
 }

@@ -16,7 +16,7 @@ namespace CoolForecast.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -24,16 +24,16 @@ namespace CoolForecast.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Sources",
+                name: "Forecasts",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    TimestampUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DataUploadTimestampUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DataOid = table.Column<uint>(type: "oid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Sources", x => x.Id);
+                    table.PrimaryKey("PK_Forecasts", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -41,12 +41,16 @@ namespace CoolForecast.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    PersonnelNumber = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    SecondName = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     DepartmentId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Employees", x => x.Id);
+                    table.UniqueConstraint("AK_Employees_PersonnelNumber", x => x.PersonnelNumber);
                     table.ForeignKey(
                         name: "FK_Employees_Departments_DepartmentId",
                         column: x => x.DepartmentId,
@@ -60,18 +64,31 @@ namespace CoolForecast.Api.Migrations
                 columns: table => new
                 {
                     Time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Probability = table.Column<double>(type: "double precision", nullable: true),
-                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: false)
+                    Probability = table.Column<double>(type: "double precision", precision: 5, scale: 2, nullable: true),
+                    PersonnelNumber = table.Column<string>(type: "character varying(16)", nullable: false),
+                    ForecastId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.ForeignKey(
-                        name: "FK_LayoffForecasts_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
+                        name: "FK_LayoffForecasts_Employees_PersonnelNumber",
+                        column: x => x.PersonnelNumber,
                         principalTable: "Employees",
+                        principalColumn: "PersonnelNumber",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LayoffForecasts_Forecasts_ForecastId",
+                        column: x => x.ForecastId,
+                        principalTable: "Forecasts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Departments_Name",
+                table: "Departments",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Employees_DepartmentId",
@@ -79,16 +96,32 @@ namespace CoolForecast.Api.Migrations
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LayoffForecasts_EmployeeId",
+                name: "IX_Employees_PersonnelNumber",
+                table: "Employees",
+                column: "PersonnelNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LayoffForecasts_ForecastId",
                 table: "LayoffForecasts",
-                column: "EmployeeId");
+                column: "ForecastId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LayoffForecasts_PersonnelNumber",
+                table: "LayoffForecasts",
+                column: "PersonnelNumber");
             
             migrationBuilder.Sql(
                 """
                 SELECT create_hypertable( '"LayoffForecasts"', 'Time');
-                CREATE INDEX ix_employee_id_time ON "LayoffForecasts" ("EmployeeId", "Time" DESC)
                 """
             );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PersonnelNumber_Time",
+                table: "LayoffForecasts",
+                columns: new[] { "PersonnelNumber", "Time" },
+                descending: new[] { false, true });
         }
 
         /// <inheritdoc />
@@ -98,10 +131,10 @@ namespace CoolForecast.Api.Migrations
                 name: "LayoffForecasts");
 
             migrationBuilder.DropTable(
-                name: "Sources");
+                name: "Employees");
 
             migrationBuilder.DropTable(
-                name: "Employees");
+                name: "Forecasts");
 
             migrationBuilder.DropTable(
                 name: "Departments");

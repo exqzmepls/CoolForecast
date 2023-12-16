@@ -1,6 +1,7 @@
+using Carter;
 using CoolForecast.Api;
 using CoolForecast.Api.Core;
-using CoolForecast.Api.Core.Repositories;
+using CoolForecast.Api.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -10,9 +11,10 @@ builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Confi
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("postgresql")));
-builder.Services.AddScoped<ForecastService>();
+builder.Services.AddScoped<LayoffForecastService>();
 builder.Services.AddScoped<ForecastRepository>();
-builder.Services.AddScoped<SourceRepository>();
+builder.Services.AddCarter();
+builder.Services.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(Program).Assembly));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -27,10 +29,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseSerilogRequestLogging();
 
-app.MapUploadData();
-
-app.MapDepartmentsCrud();
-
-app.MapEmployeesCrud();
+app.MapCarter();
 
 app.Run();
