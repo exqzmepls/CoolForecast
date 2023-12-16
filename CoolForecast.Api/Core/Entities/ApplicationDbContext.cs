@@ -8,6 +8,7 @@ public sealed class ApplicationDbContext(DbContextOptions options) : DbContext(o
     public DbSet<Employee> Employees { get; set; } = null!;
     public DbSet<LayoffForecast> LayoffForecasts { get; set; } = null!;
     public DbSet<Forecast> Forecasts { get; set; } = null!;
+    public DbSet<Training> Trainings { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -13,6 +13,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("postgresql")));
 builder.Services.AddScoped<LayoffForecastService>();
 builder.Services.AddScoped<ForecastRepository>();
+builder.Services.AddScoped<TrainingRepository>();
 builder.Services.AddCarter();
 builder.Services.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(Program).Assembly));
 builder.Services.AddEndpointsApiExplorer();
