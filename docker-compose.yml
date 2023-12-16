@@ -2,7 +2,7 @@
 
 services:
   cool.forecast.api:
-    container_name: cool-forecast-api
+    container_name: cool-forecast-api-debug
     build:
       context: .
       dockerfile: CoolForecast.Api/Dockerfile
@@ -18,7 +18,7 @@ services:
 
   cool.forecast.db:
     image: timescale/timescaledb-ha:pg14-latest
-    container_name: cool-forecast-db
+    container_name: cool-forecast-db-debug
     environment:
       - POSTGRES_DB=cool-forecast
       - POSTGRES_USER=${DATABASE_USERNAME}
@@ -33,7 +33,7 @@ services:
 
   cool.forecast.seq:
     image: datalust/seq:latest
-    container_name: cool-forecast-seq
+    container_name: cool-forecast-seq-debug
     environment:
       - ACCEPT_EULA=Y
     ports:
