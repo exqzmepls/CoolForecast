@@ -1,33 +1,24 @@
-﻿using CoolForecast.Api.Core.Entities;
-
-namespace CoolForecast.Api.Core;
+﻿namespace CoolForecast.Api.Core;
 
 internal sealed class LayoffForecastService(
-    ApplicationDbContext dbContext,
+    IHttpClientFactory httpClientFactory,
     ILogger<LayoffForecastService> logger
 )
 {
-    public Task<IEnumerable<EmployeeLayoff>> GetLayoffForecastsAsync(
+    public async Task<IEnumerable<EmployeeLayoff>> GetLayoffForecastsAsync(
         Stream dataStream,
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Getting layoff forecasts...");
 
-        //HttpClient.PostAsync("", new StreamContent(dataStream, 4096));
+        var httpClient = httpClientFactory.CreateClient("ml");
+        var apiClient = new MlApiClient(httpClient);
 
-        var result = GetForecast();
+        var fileParameter = new FileParameter(dataStream, "file.csv", "multipart/form-data");
+        var apiResponse = await apiClient.PostAsync(fileParameter, cancellationToken);
 
-        return Task.FromResult(result);
-    }
-
-    private IEnumerable<EmployeeLayoff> GetForecast()
-    {
-        var employees = dbContext.Employees.ToList();
-        return employees.Select(e =>
-        {
-            var layoffProbability = Random.Shared.NextDouble() * 100;
-            return new EmployeeLayoff(e.PersonnelNumber, layoffProbability);
-        });
+        var result = apiResponse.Data.Select(d => new EmployeeLayoff(d.Id, d.Predict * 100));
+        return result;
     }
 }
 

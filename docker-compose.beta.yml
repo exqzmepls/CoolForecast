@@ -34,3 +34,9 @@ services:
       - ACCEPT_EULA=Y
     ports:
       - 30080:80
+
+  cool.forecast.ml:
+    image: nightmarecat/coolmlapi:lastest
+    container_name: cool-forecast-ml
+    ports:
+      - 38000:80

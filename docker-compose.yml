@@ -11,6 +11,8 @@ services:
         condition: service_healthy
       cool.forecast.seq:
         condition: service_started
+      cool.forecast.ml:
+        condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
@@ -38,3 +40,9 @@ services:
       - ACCEPT_EULA=Y
     ports:
       - 5080:80
+  
+  cool.forecast.ml:
+    image: nightmarecat/coolmlapi:lastest
+    container_name: cool-forecast-ml-development
+    ports:
+      - 5328:80

@@ -11,6 +11,11 @@ builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Confi
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("postgresql")));
+builder.Services.AddHttpClient("ml", client =>
+{
+    var baseUrl = builder.Configuration["MlApiUrl"];
+    client.BaseAddress = new Uri(baseUrl!);
+});
 builder.Services.AddScoped<LayoffForecastService>();
 builder.Services.AddScoped<ForecastRepository>();
 builder.Services.AddScoped<TrainingRepository>();
