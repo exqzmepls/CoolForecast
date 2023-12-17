@@ -24,25 +24,24 @@ internal sealed class ForecastRepository(
         logger.LogDebug("Data oid: {DataOid}", oid);
         await using (var writer = await largeObjectManager.OpenReadWriteAsync(oid, cancellationToken))
         {
-            using (var memoryOwner = MemoryPool<byte>.Shared.Rent(2048))
+            var buffer = new byte[2048];
+            var totalBytes = 0;
+
+            while (true)
             {
-                var totalBytes = 0;
-                var buffer = memoryOwner.Memory;
-
-                while (true)
+                var bytesRead = await dataStream.ReadAsync(buffer, 0, 2048, cancellationToken);
+                logger.LogDebug("Bytes read: {BytesRead}", bytesRead);
+                if (bytesRead == 0)
                 {
-                    var bytesRead = await dataStream.ReadAsync(buffer, cancellationToken);
-                    if (bytesRead == 0)
-                    {
-                        break;
-                    }
-
-                    await writer.WriteAsync(buffer, cancellationToken);
-                    totalBytes += bytesRead;
+                    break;
                 }
 
-                logger.LogDebug("Data size: {DataSize} bytes", totalBytes);
+                await writer.WriteAsync(buffer, 0, bytesRead, cancellationToken);
+                logger.LogDebug("Position: {Position}", writer.Position);
+                totalBytes += bytesRead;
             }
+
+            logger.LogDebug("Data size: {DataSize} bytes", totalBytes);
         }
 
         var forecast = new Forecast
